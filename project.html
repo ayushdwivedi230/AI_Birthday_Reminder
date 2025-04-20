@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Birthday Reminder AI</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+  <div class="container">
+    <h1>🎂 AI Birthday Reminder</h1>
+    <form id="birthday-form">
+      <input type="text" name="name" placeholder="Enter name" required />
+      <input type="date" name="date" required />
+      <button type="submit">Add Birthday</button>
+    </form>
+    <div id="confirmation"></div>
+    <button onclick="checkToday()">🎉 Check Today's Birthdays</button>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    document.getElementById("birthday-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const response = await fetch('/add_birthday', {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+      document.getElementById("confirmation").innerText = result.message;
+      e.target.reset();
+    });
+
+    async function checkToday() {
+      const response = await fetch('/check_today');
+      const data = await response.json();
+      const container = document.getElementById("results");
+      container.innerHTML = "";
+      if (data.length === 0) {
+        container.innerHTML = "<p>No birthdays today!</p>";
+      } else {
+        data.forEach(entry => {
+          const el = document.createElement("div");
+          el.className = "card";
+          el.innerHTML = `<h3>${entry.name}</h3><p>${entry.message}</p>`;
+          container.appendChild(el);
+        });
+      }
+    }
+  </script>
+</body>
+</html>
